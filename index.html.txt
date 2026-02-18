@@ -29,7 +29,7 @@
     import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
     import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
-    // 基本場景
+    
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x0b0b0b, 4, 18);
 
@@ -42,7 +42,7 @@
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     document.body.appendChild(renderer.domElement);
 
-    // 燈光
+    
     const hemi = new THREE.HemisphereLight(0xffffff, 0x222233, 0.9);
     scene.add(hemi);
 
@@ -51,7 +51,7 @@
     dir.castShadow = false;
     scene.add(dir);
 
-    // 地面（輕微反光感）
+    
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(60, 60),
       new THREE.MeshStandardMaterial({ color: 0x0b0b0b, roughness: 0.95, metalness: 0.0 })
@@ -60,14 +60,14 @@
     ground.position.y = -1.2;
     scene.add(ground);
 
-    // 控制器
+    
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.target.set(0, 0.4, 0);
     controls.minDistance = 2.2;
     controls.maxDistance = 12;
 
-    // 載入貼圖（你的紅包展開圖）
+    
     const loader = new THREE.TextureLoader();
     const texture = await new Promise((resolve, reject) => {
       loader.load(
@@ -81,15 +81,13 @@
     texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
 
-    // 一個「紅包本體」：做成薄盒子（可貼圖）
-    // 尺寸你可以調：寬 W、高 H、厚度 T
+    
     const W = 3.2, H = 4.6, T = 0.18;
 
-    // 讓貼圖在正面看起來比較像「設計圖」
-    // 你也可以改成只貼正面，背面用純紅
+    
     const redMat = new THREE.MeshStandardMaterial({ color: 0xb2181d, roughness: 0.75, metalness: 0.05 });
 
-    // 盒子六面材質：只把「正面/背面」用貼圖，其它用紅色
+    
     const texMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.85, metalness: 0.0 });
     const materials = [
       redMat, // right
@@ -103,10 +101,8 @@
     const body = new THREE.Mesh(new THREE.BoxGeometry(W, H, T), materials);
     body.position.set(0, 0.2, 0);
     scene.add(body);
-
-    // 紅包蓋（flap）：用一片薄薄的平面，做 pivot 旋轉
-    const flapH = 1.5;          // 蓋子高度
-    const flapW = W * 0.98;     // 蓋子寬
+    const flapH = 1.5;          
+    const flapW = W * 0.98;     
     const flapGeo = new THREE.PlaneGeometry(flapW, flapH);
     const flapMat = new THREE.MeshStandardMaterial({
       color: 0xb2181d,
@@ -117,19 +113,19 @@
 
     const flap = new THREE.Mesh(flapGeo, flapMat);
 
-    // flapPivot 放在本體上緣，方便掀蓋
+    
     const flapPivot = new THREE.Object3D();
     flapPivot.position.set(0, body.position.y + H/2 - 0.02, T/2 + 0.001);
     scene.add(flapPivot);
 
-    // flap 的中心在 pivot 下方，所以往下移半高
+    
     flap.position.set(0, -flapH/2, 0);
     flapPivot.add(flap);
 
-    // 初始：闔上（稍微往前蓋住）
+    
     flapPivot.rotation.x = 0;
 
-    // 點擊互動：raycast 點到 body 或 flap 就切換開/闔
+    
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     let isOpen = false;
@@ -145,16 +141,16 @@
       raycaster.setFromCamera(mouse, camera);
       const hits = raycaster.intersectObjects([body, flap], true);
       if (hits.length) {
-        // 切換狀態
+        
         isOpen = !isOpen;
         animT = 0;
         animFrom = flapPivot.rotation.x;
-        animTo = isOpen ? -Math.PI * 0.85 : 0; // 開到約 153 度
+        animTo = isOpen ? -Math.PI * 0.85 : 0; 
       }
     }
     window.addEventListener("pointerdown", onPointerDown);
 
-    // Resize
+    
     window.addEventListener("resize", () => {
       camera.aspect = innerWidth / innerHeight;
       camera.updateProjectionMatrix();
@@ -162,16 +158,16 @@
       renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     });
 
-    // 小小的「桌上展示」角度
+    
     body.rotation.y = Math.PI * 0.08;
 
-    // 動畫迴圈
+    
     const clock = new THREE.Clock();
     function animate() {
       requestAnimationFrame(animate);
       const dt = Math.min(clock.getDelta(), 0.033);
 
-      // 掀蓋動畫（ease）
+      
       if (animT < 1) {
         animT = Math.min(1, animT + dt * 3.2);
         const t = animT * animT * (3 - 2 * animT); // smoothstep
