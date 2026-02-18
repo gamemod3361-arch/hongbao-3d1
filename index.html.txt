@@ -71,7 +71,7 @@
     const loader = new THREE.TextureLoader();
     const texture = await new Promise((resolve, reject) => {
       loader.load(
-        "./texture.jpg",
+        "./texture.jpg.PNG",
         t => resolve(t),
         undefined,
         e => reject(e)
